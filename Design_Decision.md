@@ -1,4 +1,6 @@
 Design Decisions for the Bakery System
+
+
 1️⃣ Microservices Architecture with Docker Compose
 Why: To isolate each component (frontend, backend, DB, cache, queue, worker) for better scalability, flexibility, and maintainability.
 
