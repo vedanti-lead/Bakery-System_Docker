@@ -1,70 +1,213 @@
-# Getting Started with Create React App
+# 🍰 Bakery Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A containerized web-based application designed to streamline bakery inventory and order processing using a microservices architecture.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🧱 System Architecture
 
-### `npm start`
+This solution consists of the following core services:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- PostgreSQL: Acts as the primary database, storing products, orders, and item details.
+- Redis: Used as a cache layer for faster access to product and order information.
+- RabbitMQ: Handles message queuing for asynchronous order processing.
+- Flask Backend API: Provides REST endpoints for frontend communication and business logic.
+- React Frontend: A responsive interface that allows users to view and order bakery items.
+- Worker Service: A background service that listens to the RabbitMQ queue and processes orders.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🔄 Application Flow
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Customers browse the product catalog through the frontend.
+2. When an order is placed, the backend stores it in PostgreSQL and publishes a message to RabbitMQ.
+3. The worker service picks up the message and processes the order in the background.
+4. As processing continues, order status updates are reflected in the database.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+ 🛠️ Getting Started
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+ Prerequisites
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Ensure you have the following installed:
 
-### `npm run eject`
+- Docker and Docker Compose
+- Git
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+ Installation
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Clone the project repository:
+   ```bash
+   git clone <repository-url>
+   cd bakery-system
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. Start the application:
+   ```bash
+   docker-compose up -d
+   ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. Access the services:
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - Backend API: [http://localhost:5000](http://localhost:5000)
+   - RabbitMQ UI: [http://localhost:15672](http://localhost:15672)  
+     (Username: `guest`, Password: `guest`)
 
-## Learn More
+Stopping the App
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+To shut down all services:
+```bash
+docker-compose down
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+ Rebuilding After Changes
 
-### Code Splitting
+If you've made updates to the source code:
+```bash
+docker-compose build
+docker-compose up -d
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+ 📡 API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+ 📦 Products
 
-### Making a Progressive Web App
+**GET** `/api/products`  
+Fetch all available bakery products.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+**Response**:
+```json
+[
+  {
+    "id": 1,
+    "name": "Chocolate Cake",
+    "description": "Rich chocolate layer cake with ganache",
+    "price": 29.99,
+    "image_url": "chocolate_cake.jpg"
+  }
+]
+```
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+🧾 Orders
 
-### Deployment
+**POST** `/api/orders`  
+Create a new customer order.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+**Sample Request**:
+```json
+{
+  "customer_name": "Vedanti Verma",
+  "customer_email": "vedanti@example.com",
+  "items": [
+    {
+      "product_id": 1,
+      "quantity": 2,
+      "price": 29.99
+    }
+  ]
+}
+```
 
-### `npm run build` fails to minify
+**Response**:
+```json
+{
+  "order_id": 123,
+  "status": "pending",
+  "queue_status": "sent to processing queue"
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+**GET** `/api/orders/{order_id}`  
+View the status of an individual order.
+
+**Sample Response**:
+```json
+{
+  "order_id": 123,
+  "customer_name": "Vedanti Verma",
+  "status": "processing",
+  "created_at": "2023-04-02 15:30:45",
+  "items": [
+    {
+      "product_name": "Chocolate Cake",
+      "quantity": 2,
+      "unit_price": 29.99,
+      "total": 59.98
+    }
+  ]
+}
+```
+
+---
+
+### 🔍 Health Check
+
+**GET** `/health`  
+Verifies if the system services are running as expected.
+
+**Response**:
+```json
+{
+  "status": "ok",
+  "services": {
+    "database": "healthy",
+    "rabbitmq": "healthy",
+    "redis": "healthy"
+  }
+}
+```
+
+---
+
+ 🛠️ Design Decisions
+
+🐳 Container Strategy
+
+- Each component is containerized separately to promote modularity and scalability.
+- Volumes are attached to PostgreSQL, Redis, and RabbitMQ to retain state across reboots.
+- Health checks are defined for essential services to monitor uptime.
+
+---
+
+ 🚀 Advanced Features
+
+⚡ Redis Integration
+
+- Speeds up product listing access using in-memory caching.
+- Temporarily stores order data for quicker UI updates.
+- Includes cache invalidation to maintain data consistency.
+
+ 🎯 Background Worker
+
+- Orders are processed in the background through RabbitMQ.
+- Includes retry logic for failed processing attempts.
+- Updates order status automatically post-processing.
+
+---
+
+🔐 Security Aspects
+
+- Uses environment variables to protect sensitive information.
+- Containers run in isolated environments.
+- Docker networks ensure controlled service communication.
+
+---
+
+📈 Future Enhancements
+
+- User login and authentication features.
+- Switch to HTTPS for secure communication.
+- Set up real-time user notifications (email/SMS/webhooks).
+- Add a monitoring stack (e.g., Prometheus, Grafana).
+- CI/CD integration for auto-deployment and testing.
+- Expand order handling to include delivery tracking.
+
+---
+
