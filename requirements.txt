@@ -1,0 +1,6 @@
+Flask==2.0.1
+Werkzeug==2.0.3  # Add this line
+Flask-CORS==3.0.10
+psycopg2-binary==2.9.1
+pika==1.2.0
+redis==3.5.3
