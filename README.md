@@ -15,6 +15,10 @@ This solution consists of the following core services:
 - React Frontend: A responsive interface that allows users to view and order bakery items.
 - Worker Service: A background service that listens to the RabbitMQ queue and processes orders.
 
+![image](https://github.com/user-attachments/assets/c3c1cc3d-fc68-4ced-9119-27a6627a55f7)
+
+
+
 ---
 
 ## 🔄 Application Flow
